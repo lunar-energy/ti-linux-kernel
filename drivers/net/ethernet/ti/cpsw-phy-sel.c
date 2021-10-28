@@ -45,6 +45,11 @@ static void cpsw_gmii_sel_am3352(struct cpsw_phy_sel_priv *priv,
 	u32 mode = 0;
 	bool rgmii_id = false;
 
+	pr_info("FLC: cpsw_gmii_sel_am3352 KERNEL SET PHY MODE\r\n");
+	priv->gmii_sel = 0xc5;
+	writel(reg, priv->gmii_sel);
+	return;
+
 	reg = readl(priv->gmii_sel);
 
 	switch (phy_mode) {

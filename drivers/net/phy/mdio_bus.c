@@ -40,6 +40,19 @@
 
 #include "mdio-boardinfo.h"
 
+#define PHY_RESET_LINE (2 * 32 + 19) // A led light on the hardware is goip2_19
+
+void flc_set(void)
+{
+	int ret;
+	ret = gpio_request_one(PHY_RESET_LINE, (GPIOF_DIR_OUT | GPIOF_OUT_INIT_HIGH),
+				"[phy_nrst]");
+	pr_info("FLC: flc_set Forcibly assert the PHY Reset...\r\n");
+	gpio_set_value(PHY_RESET_LINE, 0);
+	udelay(1000);
+	gpio_set_value(PHY_RESET_LINE, 1);
+}
+
 static int mdiobus_register_gpiod(struct mdio_device *mdiodev)
 {
 	int error;
@@ -407,6 +420,8 @@ int __mdiobus_register(struct mii_bus *bus, struct module *owner)
 		udelay(bus->reset_delay_us);
 		gpiod_set_value_cansleep(gpiod, 0);
 	}
+
+	flc_set();
 
 	if (bus->reset)
 		bus->reset(bus);
