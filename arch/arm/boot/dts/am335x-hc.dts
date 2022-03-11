@@ -99,12 +99,23 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&clkout2_pin>;
 
-	/* USB0 = GSM comms */
+	/* USB0 = BG95 Cellular comms */
 	usb0_pins: pinmux_usb0_pins {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_USB0_DRVVBUS, PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* (F16) usb0_drvvbus.gpio0_18 */
 		>;
 	};
+
+        /* BG95
+                GPIO1_16 is BG_ANT_SEL
+         */
+        bg95_pins: pinmux_bg95_pins {
+                pinctrl-single,pins = <
+			AM33XX_IOPAD(AM335X_PIN_GPMC_A0, PIN_OUTPUT | MUX_MODE7)			/* (R13) gpmc_a0.gpio1_16 */
+
+                >;
+        };
+
 
 	/* USB1 = Host comms */
 	usb1_pins: pinmux_usb1_pins {
@@ -261,12 +272,14 @@
 	};
 
 	/* WiFi
+		GPIO0_31 is WIFI_ANT_SEL
 		GPIO1_17 is WIFI_IRQ
 		GPIO1_28 is WIFI_TRI
 		GPIO2_22 is WIFI_EN
 	 */
 	wlan_pins: pinmux_wlan_pins {
 		pinctrl-single,pins = <
+			AM33XX_IOPAD(AM335X_PIN_GPMC_WPN, PIN_OUTPUT | MUX_MODE7)			/* (U17) gpmc_wpn.gpio0_31 */
 			AM33XX_IOPAD(AM335X_PIN_GPMC_A1, PIN_INPUT | MUX_MODE7)				/* (V14) gpmc_a1.gpio1_17 */
 			AM33XX_IOPAD(AM335X_PIN_GPMC_BEN1, PIN_OUTPUT | MUX_MODE7)			/* (U18) gpmc_be1n.gpio1_28 */
 			AM33XX_IOPAD(AM335X_PIN_LCD_VSYNC, PIN_OUTPUT | MUX_MODE7)			/* (U5) lcd_vsync.gpio2_22 */
@@ -333,7 +346,7 @@
 &usb0_phy {
 	status = "okay";
 	pinctrl-names = "default";
-	pinctrl-0 = <&usb0_pins>;
+	pinctrl-0 = <&usb0_pins &bg95_pins>;
 };
 
 &usb0 {
@@ -487,7 +500,22 @@
 };
 
 /* Set the default state for the various enable/reset signals */
+&gpio0 {
+	wifi_ant_sel {
+		gpio-hog;
+		gpios = <31 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "WIFI_ANT_SEL";
+	};
+};
+
 &gpio1 {
+	bg_ant_sel {
+		gpio-hog;
+		gpios = <16 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "BG_ANT_SEL";
+	};
 	wifi_tri {
 		gpio-hog;
 		gpios = <28 GPIO_ACTIVE_HIGH>;
