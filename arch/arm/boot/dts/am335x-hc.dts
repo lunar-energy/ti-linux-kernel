@@ -84,10 +84,8 @@
 };
 
 &cpu0_opp_table {
-	/* use this code below to ensure the LinuxOS runs at 600MHz OPP100 point */
-
-	opp100@600000000 {
-		opp-supported-hw = <0x06 0x0040>;
+	oppnitro-1000000000 {
+		opp-supported-hw = <0x06 0x0100>;
 	};
 };
 
