@@ -499,46 +499,79 @@
 
 /* Set the default state for the various enable/reset signals */
 &gpio0 {
+	gpio-line-names =
+		"", "", "", "",
+		"", "", "SD_CD", "",
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "USB0_EN", "",
+		"", "", "LED3", "LED2",
+		"", "", "LED1", "LED0",
+		"", "", "", "WIFI_ANT_SEL";
 	wifi_ant_sel {
 		gpio-hog;
 		gpios = <31 GPIO_ACTIVE_HIGH>;
 		output-low;
-		line-name = "WIFI_ANT_SEL";
 	};
 };
 
 &gpio1 {
+	gpio-line-names =
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "", "",
+		"BG_ANT_SEL", "", "", "IO8",
+		"LED5", "LED4", "IO9", "IOA",
+		"IOB", "", "", "LED6",
+		"WIFI_TRI", "", "", "";
 	bg_ant_sel {
 		gpio-hog;
 		gpios = <16 GPIO_ACTIVE_HIGH>;
 		output-low;
-		line-name = "BG_ANT_SEL";
 	};
 	wifi_tri {
 		gpio-hog;
 		gpios = <28 GPIO_ACTIVE_HIGH>;
 		output-high;
-		line-name = "WIFI_TRI";
 	};
 };
 
 &gpio2 {
+	gpio-line-names =
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "", "",
+		"", "", "", "PHY_RESET",
+		"", "", "WIFI_EN", "BT_EN",
+		"RS_TXEN", "IO7", "", "",
+		"", "", "", "";
 	phy_reset {
 		gpio-hog;
 		gpios = <19 GPIO_ACTIVE_LOW>;
 		output-high;
-		line-name = "PHY_RESET";
 	};
 	wifi_en {
 		gpio-hog;
 		gpios = <22 GPIO_ACTIVE_HIGH>;
 		output-high;
-		line-name = "WIFI_EN";
 	};
 	bt_en {
 		gpio-hog;
 		gpios = <23 GPIO_ACTIVE_HIGH>;
 		output-high;
-		line-name = "BT_EN";
 	};
+};
+
+&gpio3 {
+	gpio-line-names =
+		"", "", "", "",
+		"IO0", "", "", "",
+		"", "", "", "",
+		"", "USB1_EN", "IO1", "PWR_KEY",
+		"IO2", "IO3", "IO4", "IO5",
+		"", "IO6", "", "",
+		"", "", "", "",
+		"", "", "", "";
 };
