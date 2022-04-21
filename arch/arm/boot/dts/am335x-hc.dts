@@ -81,6 +81,17 @@
 		compatible = "ti,am335x-bandgap";
 		reg = <0x44e10448 0x8>;
 	};
+
+	watchdog: watchdog {
+		/* MAX6371 on GPIO */
+		pinctrl-names = "default";
+		pinctrl-0 = <&wdog_pins>;
+		compatible = "linux,wdt-gpio";
+		gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;
+		hw_algo = "toggle";
+		hw_margin_ms = <60000>;
+		always-running;
+	};
 };
 
 &cpu0_opp_table {
@@ -291,6 +302,13 @@
 			AM33XX_IOPAD(AM335X_PIN_UART1_CTSN, PIN_OUTPUT_PULLUP | MUX_MODE2)		/* (D18) uart1_ctsn.dcan0_tx */
 		>;
 	};
+
+	/* MAX6371 Watchdog */
+	wdog_pins: pinmux_wdog_pins {
+		pinctrl-single,pins = <
+			AM33XX_IOPAD(AM335X_PIN_GPMC_A3, PIN_OUTPUT | MUX_MODE7)			/* (T14) gpmc_a3.gpio1_19 */
+		>;
+	};
 };
 
 /* UART0 = Console */
@@ -380,19 +398,13 @@
 		reg = <0x19>;
 	};
 
-	/* CAT24C32WI-GT3 4KB EEPROM */
+	/* CAT24C512WI-GT3 64KB EEPROM */
 	base_eeprom: eeprom@50 {
-		compatible = "atmel,24c32";
+		compatible = "atmel,24c512";
 		reg = <0x50>;
-		pagesize = <32>;
-		size = <4096>;
+		pagesize = <128>;
+		size = <65536>;
 		address-width = <16>;
-	};
-
-	/* PCF85363ATT RTC */
-	pcf85363: rtc@51 {
-		compatible = "nxp,pcf85363";
-		reg = <0x51>;
 	};
 
 	/* 24AA025E48T MAC ID 256B EEPROM */
@@ -500,19 +512,14 @@
 /* Set the default state for the various enable/reset signals */
 &gpio0 {
 	gpio-line-names =
-		"", "", "", "",
-		"", "", "SD_CD", "",
+		"", "", "EX_CLK", "EX_MOSI",
+		"EX_MISO", "EX_CS", "SD_CD", "",
 		"", "", "", "",
 		"", "", "", "",
 		"", "", "USB0_EN", "",
 		"", "", "LED3", "LED2",
 		"", "", "LED1", "LED0",
 		"", "", "", "WIFI_ANT_SEL";
-	wifi_ant_sel {
-		gpio-hog;
-		gpios = <31 GPIO_ACTIVE_HIGH>;
-		output-low;
-	};
 };
 
 &gpio1 {
@@ -521,15 +528,10 @@
 		"", "", "", "",
 		"", "", "", "",
 		"", "", "", "",
-		"BG_ANT_SEL", "", "", "IO8",
-		"LED5", "LED4", "IO9", "IOA",
-		"IOB", "", "", "LED6",
+		"BG_ANT_SEL", "", "", "WD_IN",
+		"LED5", "LED4", "BG_STATUS", "WD_SET0",
+		"EXT_BUT", "", "", "LED6",
 		"WIFI_TRI", "", "", "";
-	bg_ant_sel {
-		gpio-hog;
-		gpios = <16 GPIO_ACTIVE_HIGH>;
-		output-low;
-	};
 	wifi_tri {
 		gpio-hog;
 		gpios = <28 GPIO_ACTIVE_HIGH>;
@@ -545,7 +547,7 @@
 		"", "", "", "",
 		"", "", "", "PHY_RESET",
 		"", "", "WIFI_EN", "BT_EN",
-		"RS_TXEN", "IO7", "", "",
+		"RS_TXEN", "RS_RXEN", "", "",
 		"", "", "", "";
 	phy_reset {
 		gpio-hog;
@@ -570,8 +572,8 @@
 		"IO0", "", "", "",
 		"", "", "", "",
 		"", "USB1_EN", "IO1", "PWR_KEY",
-		"IO2", "IO3", "IO4", "IO5",
-		"", "IO6", "", "",
+		"IO2", "IO3", "WD_SET2", "IO5",
+		"", "WD_SET1", "", "",
 		"", "", "", "",
 		"", "", "", "";
 };
