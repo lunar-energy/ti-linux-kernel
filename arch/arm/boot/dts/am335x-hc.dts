@@ -512,8 +512,8 @@
 /* Set the default state for the various enable/reset signals */
 &gpio0 {
 	gpio-line-names =
-		"", "", "EX_CLK", "EX_MOSI",
-		"EX_MISO", "EX_CS", "SD_CD", "",
+		"", "", "DC_PLC_RST", "GPIO1",
+		"GPIO0", "AC_PLC_RST", "SD_CD", "",
 		"", "", "", "",
 		"", "", "", "",
 		"", "", "USB0_EN", "",
@@ -569,9 +569,9 @@
 &gpio3 {
 	gpio-line-names =
 		"", "", "", "",
-		"IO0", "", "", "",
+		"AC_PLC_SEL", "", "", "",
 		"", "", "", "",
-		"", "USB1_EN", "IO1", "PWR_KEY",
+		"", "USB1_EN", "DC_PLC_SEL", "PWR_KEY",
 		"IO2", "IO3", "WD_SET2", "IO5",
 		"", "WD_SET1", "", "",
 		"", "", "", "",
