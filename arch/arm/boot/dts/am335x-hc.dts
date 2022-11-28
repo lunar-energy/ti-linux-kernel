@@ -106,9 +106,32 @@
 
 &am33xx_pinmux {
 	pinctrl-names = "default";
-	pinctrl-0 = <&clkout2_pin>;
+	pinctrl-0 = < &clkout2_pin &gpio_pins >;
 
-	/* USB0 = BG95 Cellular comms */
+	/* GPIOs
+		GPIO0_2 is DC_PLC_RST
+		GPIO0_3 is GPIO1
+		GPIO0_4 is GPIO0
+		GPIO0_5 is AC_PLC_RST
+		GPIO1_24 is EXT_BUT
+		GPIO3_4 is AC_PLC_SEL
+		GPIO3_14 is DC_PLC_SEL
+	*/
+	gpio_pins: pinmux_gpio_pins {
+		pinctrl-single,pins = <
+			AM33XX_IOPAD(AM335X_PIN_SPI0_SCLK, PIN_OUTPUT | MUX_MODE7)			/* (A17) spi0_sclk.gpio0_2 */
+			AM33XX_IOPAD(AM335X_PIN_SPI0_D0, PIN_OUTPUT | MUX_MODE7)			/* (B17) spi0_d0.gpio0_3 */
+			AM33XX_IOPAD(AM335X_PIN_SPI0_D1, PIN_OUTPUT | MUX_MODE7)			/* (B16) spi0_d1.gpio0_4 */
+			AM33XX_IOPAD(AM335X_PIN_SPI0_CS0, PIN_OUTPUT | MUX_MODE7)			/* (A16) spi0_cs0.gpio0_5 */
+			AM33XX_IOPAD(AM335X_PIN_GPMC_A8, PIN_INPUT | MUX_MODE7)				/* (V16) gpmc_a8.gpio1_24 */
+			AM33XX_IOPAD(AM335X_PIN_MII1_RX_DV, PIN_OUTPUT | MUX_MODE7)			/* (J17) gmii1_rxdv.gpio3_4 */
+			AM33XX_IOPAD(AM335X_PIN_MCASP0_ACLKX, PIN_OUTPUT | MUX_MODE7)			/* (A13) mcasp0_aclkx.gpio3_14 */
+		>;
+	};
+
+	/* USB0 = BG95 Cellular comms
+		GPIO0_18 is USB0_EN
+	*/
 	usb0_pins: pinmux_usb0_pins {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_USB0_DRVVBUS, PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* (F16) usb0_drvvbus.gpio0_18 */
@@ -117,16 +140,21 @@
 
         /* BG95
                 GPIO1_16 is BG_ANT_SEL
+		GPIO1_22 is BG_STATUS
+		GPIO3_15 is PWR_KEY
          */
         bg95_pins: pinmux_bg95_pins {
                 pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_GPMC_A0, PIN_OUTPUT | MUX_MODE7)			/* (R13) gpmc_a0.gpio1_16 */
-
+			AM33XX_IOPAD(AM335X_PIN_GPMC_A6, PIN_INPUT | MUX_MODE7)				/* (U15) gpmc_a6.gpio1_22 */
+			AM33XX_IOPAD(AM335X_PIN_MCASP0_FSX, PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* (B13) mcasp0_fsx.gpio3_15 */
                 >;
         };
 
 
-	/* USB1 = Host comms */
+	/* USB1 = Host comms
+		GPIO3_13 is USB1_EN
+	*/
 	usb1_pins: pinmux_usb1_pins {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_USB1_DRVVBUS, PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* (F15) usb1_drvvbus.gpio3_13 */
@@ -186,12 +214,14 @@
 
 	/* UART4 = RS485
 		GPIO2_24 is RS_TXEN
+		GPIO2_25 is RS_RXEN
 	 */
 	uart4_pins: uart4_pins_default {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_MII1_TXD3, PIN_INPUT | MUX_MODE3)			/* (J18) gmii1_txd3.uart4_rxd */
 			AM33XX_IOPAD(AM335X_PIN_MII1_TXD2, PIN_OUTPUT | MUX_MODE3)			/* (K15) gmii1_txd2.uart4_txd */
 			AM33XX_IOPAD(AM335X_PIN_LCD_PCLK, PIN_OUTPUT_PULLUP | MUX_MODE7)		/* (V5) lcd_pclk.gpio2_24 */
+			AM33XX_IOPAD(AM335X_PIN_LCD_AC_BIAS_EN,	PIN_OUTPUT_PULLUP | MUX_MODE7)		/* (R6)	lcd_ac_bias_en.gpio2_25 */
 		>;
 	};
 
@@ -208,7 +238,9 @@
 		>;
 	};
 
-	/* RMII Slave 1*/
+	/* RMII Slave 1
+		GPIO2_19 is R1RST
+	*/
 	cpsw_default: cpsw_default {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_MII1_CRS, PIN_INPUT_PULLUP | MUX_MODE1)			/* (H17) gmii1_crs.rmii1_crs_dv */
@@ -219,7 +251,8 @@
 			AM33XX_IOPAD(AM335X_PIN_MII1_RXD0, PIN_INPUT_PULLUP | MUX_MODE1)		/* (M16) gmii1_rxd0.rmii1_rxd0 */
 			AM33XX_IOPAD(AM335X_PIN_MII1_RXD1, PIN_INPUT_PULLUP | MUX_MODE1)		/* (L15) gmii1_rxd1.rmii1_rxd1 */
 			AM33XX_IOPAD(AM335X_PIN_RMII1_REF_CLK, PIN_INPUT_PULLUP | MUX_MODE0)		/* (H18) rmii1_refclk.rmii1_refclk */
-			>;
+			AM33XX_IOPAD(AM335X_PIN_MII1_RXD2, PIN_OUTPUT_PULLUP | MUX_MODE7)		/* (L16) gmii1_rxd2.gpio2_19 */
+		>;
 	};
 
 	/* MDIO */
@@ -303,10 +336,18 @@
 		>;
 	};
 
-	/* MAX6371 Watchdog */
+	/* MAX6371 Watchdog
+		GPIO1_19 is WD_IN
+		GPIO1_23 is WD_SET0
+		GPIO3_18 is WD_SET2
+		GPIO3_21 is WD_SET1
+	*/
 	wdog_pins: pinmux_wdog_pins {
 		pinctrl-single,pins = <
 			AM33XX_IOPAD(AM335X_PIN_GPMC_A3, PIN_OUTPUT | MUX_MODE7)			/* (T14) gpmc_a3.gpio1_19 */
+			AM33XX_IOPAD(AM335X_PIN_GPMC_A7, PIN_INPUT | MUX_MODE7)				/* (T15) gpmc_a7.gpio1_23 */
+			AM33XX_IOPAD(AM335X_PIN_MCASP0_ACLKR, PIN_INPUT | MUX_MODE7)			/* (B12) mcasp0_aclkr.gpio3_18 */
+			AM33XX_IOPAD(AM335X_PIN_MCASP0_AHCLKX, PIN_INPUT | MUX_MODE7)			/* (A14) mcasp0_ahclkx.gpio3_21 */
 		>;
 	};
 };
