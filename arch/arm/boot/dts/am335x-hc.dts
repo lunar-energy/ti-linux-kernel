@@ -90,7 +90,6 @@
 		gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;
 		hw_algo = "toggle";
 		hw_margin_ms = <60000>;
-		always-running;
 	};
 };
 
