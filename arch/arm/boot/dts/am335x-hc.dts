@@ -77,6 +77,12 @@
 		regulator-max-microvolt = <3300000>;
 	};
 
+	vusbphy_dummy: fixedregulator1 {
+		compatible = "regulator-fixed";
+		regulator-name = "vusbphy_dummy";
+		regulator-always-on;
+	};
+
 	bandgap@44e10448 {
 		compatible = "ti,am335x-bandgap";
 		reg = <0x44e10448 0x8>;
@@ -403,6 +409,7 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&usb0_pins &bg95_pins>;
+	vcc-supply = <&vusbphy_dummy>;
 };
 
 &usb0 {
@@ -414,6 +421,7 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&usb1_pins>;
+	vcc-supply = <&vusbphy_dummy>;
 };
 
 &usb1 {

@@ -23,7 +23,7 @@
 #include <linux/slab.h>
 #include <linux/sysfs.h>
 
-#define DRV_NAME	"am335x-bandgap"
+#define DRV_NAME	"am335x_bandgap"
 
 #define BANDGAP_CTRL			0x0
 #define BANDGAP_CTRL_DTEMP_MASK		0x0000FF00
@@ -50,72 +50,89 @@ struct am335x_bandgap {
 	struct device *hwmon_dev;
 };
 
-static ssize_t show_name(struct device *dev, struct device_attribute
-			 *devattr, char *buf)
-{
-	return sprintf(buf, "%s\n", DRV_NAME);
-}
-
-static ssize_t show_input(struct device *dev,
-			  struct device_attribute *devattr, char *buf)
+static int am335x_bandgap_read(struct device *dev, enum hwmon_sensor_types type,
+				u32 attr, int channel, long *temp)
 {
 	struct am335x_bandgap *data = dev_get_drvdata(dev);
-	u32 val, temp;
+	int value;
 
-	/* read measurement */
-	val = readl(data->regs + BANDGAP_CTRL);
+	switch (attr) {
+	case hwmon_temp_input:
+		value = readl(data->regs + BANDGAP_CTRL);
+		value = (value & BANDGAP_CTRL_DTEMP_MASK) >> BANDGAP_CTRL_DTEMP_OFF;
+		value = value * 1000;
+		break;
+	default:
+		return -EOPNOTSUPP;
+	}
 
-	/* compute temperature */
-	val = (val & BANDGAP_CTRL_DTEMP_MASK) >> BANDGAP_CTRL_DTEMP_OFF;
-	temp = val * 1000;
-
-	return sprintf(buf, "%d\n", temp);
+	*temp = value;
+	return 0;
 }
 
-static SENSOR_DEVICE_ATTR(name, S_IRUGO, show_name, NULL, 0);
-static SENSOR_DEVICE_ATTR(temp1_input, S_IRUGO, show_input, NULL, 0);
+static umode_t am335x_bandgap_is_visible(const void *_data, enum hwmon_sensor_types type,
+				u32 attr, int channel)
+{
+	if (type != hwmon_temp)
+		return 0;
 
-struct attribute *am335x_bandgap_attributes[] = {
-	&sensor_dev_attr_name.dev_attr.attr,
-	&sensor_dev_attr_temp1_input.dev_attr.attr,
+	switch (attr) {
+	case hwmon_temp_input:
+		return 0444;
+	default:
+		return 0;
+	}
+}
+
+static const u32 am335x_bandgap_temp_config[] = {
+	HWMON_T_INPUT,
+	0
+};
+
+static const struct hwmon_channel_info am335x_bandgap_hwmon_temp = {
+	.type = hwmon_temp,
+	.config = am335x_bandgap_temp_config
+};
+
+static const struct hwmon_channel_info *am335x_bandgap_hwmon_info[] = {
+	&am335x_bandgap_hwmon_temp,
 	NULL
 };
 
-static const struct attribute_group am335x_bandgap_group = {
-	.attrs = am335x_bandgap_attributes,
+static const struct hwmon_ops am335x_bandgap_hwmon_ops = {
+	.is_visible = am335x_bandgap_is_visible,
+	.read = am335x_bandgap_read,
+};
+
+static const struct hwmon_chip_info am335x_bandgap_chip_info = {
+	.ops = &am335x_bandgap_hwmon_ops,
+	.info = am335x_bandgap_hwmon_info,
 };
 
 static int am335x_bandgap_probe(struct platform_device *pdev)
 {
 	struct am335x_bandgap *data;
-	struct resource *res;
 	int err;
 
 	data = devm_kzalloc(&pdev->dev, sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
 
-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-	if (!res)
-		return -ENODEV;
-
-	data->regs = devm_ioremap_resource(&pdev->dev, res);
-	if (!data->regs)
-		return -ENODEV;
+	data->regs = devm_platform_ioremap_resource(pdev, 0);
+	if (IS_ERR(data->regs))
+		return PTR_ERR(data->regs);
 
 	platform_set_drvdata(pdev, data);
 
-	err = sysfs_create_group(&pdev->dev.kobj, &am335x_bandgap_group);
-	if (err < 0) {
-		dev_err(&pdev->dev, "Create sysfs group failed (%d)\n", err);
-		return err;
-	}
-
-	data->hwmon_dev = hwmon_device_register(&pdev->dev);
+	data->hwmon_dev = hwmon_device_register_with_info(&pdev->dev,
+						DRV_NAME,
+						data,
+						&am335x_bandgap_chip_info,
+						NULL);
 	if (IS_ERR(data->hwmon_dev)) {
 		err = PTR_ERR(data->hwmon_dev);
 		dev_err(&pdev->dev, "Class registration failed (%d)\n", err);
-		goto exit_sysfs_group;
+		return err;
 	}
 
 	/* enable HW sensor */
@@ -123,10 +140,6 @@ static int am335x_bandgap_probe(struct platform_device *pdev)
 		data->regs + BANDGAP_CTRL);
 
 	return 0;
-
-exit_sysfs_group:
-	sysfs_remove_group(&pdev->dev.kobj, &am335x_bandgap_group);
-	return err;
 }
 
 static int am335x_bandgap_remove(struct platform_device *pdev)
@@ -137,7 +150,6 @@ static int am335x_bandgap_remove(struct platform_device *pdev)
 	writel(0x0, data->regs + BANDGAP_CTRL);
 
 	hwmon_device_unregister(data->hwmon_dev);
-	sysfs_remove_group(&pdev->dev.kobj, &am335x_bandgap_group);
 
 	return 0;
 }
