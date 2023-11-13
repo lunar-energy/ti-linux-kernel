@@ -239,7 +239,7 @@
 			AM33XX_IOPAD(AM335X_PIN_LCD_DATA8, PIN_OUTPUT | MUX_MODE4)			/* (U1) lcd_data8.uart5_txd */
 			AM33XX_IOPAD(AM335X_PIN_LCD_DATA14, PIN_INPUT | MUX_MODE6)			/* (V4) lcd_data14.uart5_ctsn */
 			AM33XX_IOPAD(AM335X_PIN_LCD_DATA15, PIN_OUTPUT | MUX_MODE6)			/* (T5) lcd_data15.uart5_rtsn */
-			AM33XX_IOPAD(AM335X_PIN_LCD_HSYNC, PIN_OUTPUT | MUX_MODE6)			/* (R5) lcd_hsync.gpio2_23 */
+			AM33XX_IOPAD(AM335X_PIN_LCD_HSYNC, PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* (R5) lcd_hsync.gpio2_23 */
 		>;
 	};
 
@@ -605,11 +605,6 @@
 	wifi_en {
 		gpio-hog;
 		gpios = <22 GPIO_ACTIVE_HIGH>;
-		output-high;
-	};
-	bt_en {
-		gpio-hog;
-		gpios = <23 GPIO_ACTIVE_HIGH>;
 		output-high;
 	};
 };
